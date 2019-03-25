@@ -13,7 +13,8 @@ License: GPL3
 
 define('GEOPERKSFORGD_POST_TYPE', 'geoperksforgd');
 define('GEOPERKSFORGD_TEXT_DOMAIN', 'geoperksforgd_text_domain');
-define( 'GEO_PERKS_FOR_GD_FILE_PATH', __FILE__);
+define('GEOPERKSFORGD_PERK_URL', 'https://geoperks.club/wp-json/geoperks/v1');
+define( 'GEOPERKSFORGD_FILE_PATH', __FILE__);
 
 add_action('init', array('GeoperksForGeodirectoryFeatures', 'init'),0);
 
@@ -164,10 +165,10 @@ class GeoperksForGeodirectoryFeatures {
 	
 	public static function load_admin_scripts() {
 
-		wp_enqueue_style('geoperksforgd-admin-settings-css', plugins_url('assets/css/admin-settings.css',GEO_PERKS_FOR_GD_FILE_PATH ));
+		wp_enqueue_style('geoperksforgd-admin-settings-css', plugins_url('assets/css/admin-settings.css',GEOPERKSFORGD_FILE_PATH ));
 
 		
-		wp_register_script( 'geoperksforgd-admin-settings-js', plugins_url('assets/js/admin-settings-gd.js',GEO_PERKS_FOR_GD_FILE_PATH), '' , '', true);
+		wp_register_script( 'geoperksforgd-admin-settings-js', plugins_url('assets/js/admin-settings-gd.js',GEOPERKSFORGD_FILE_PATH), '' , '', true);
 
 		$params_array = array(
 			'ajax_url' => admin_url('admin-ajax.php')
@@ -192,7 +193,7 @@ class GeoperksForGeodirectoryFeatures {
 		global $wpdb;
 		$params = array('for_free_plugin' => '1','site_url'=>get_site_url());
 		
-		$url = 'https://staging.wpapps.club/wp-json/geoperks/v1/user-perk-list';
+		$url = GEOPERKSFORGD_PERK_URL.'/user-perk-list';
 
 			$response = wp_remote_post( $url, array(
 			'method' => 'POST',
