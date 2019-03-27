@@ -13,10 +13,12 @@ License: GPL3
 
 define('GEOPERKSFORGD_POST_TYPE', 'geoperksforgd');
 define('GEOPERKSFORGD_TEXT_DOMAIN', 'geoperksforgd_text_domain');
-define('GEOPERKSFORGD_PERK_URL', 'https://geoperks.club/wp-json/geoperks/v1');
-define( 'GEOPERKSFORGD_FILE_PATH', __FILE__);
+define( 'GEO_PERKS_FOR_GD_FILE_PATH', __FILE__);
+define( 'GEO_PERKS_FORGD_PATH', dirname(__FILE__));
+
 
 add_action('init', array('GeoperksForGeodirectoryFeatures', 'init'),0);
+
 
 
 class GeoperksForGeodirectoryFeatures {
@@ -25,25 +27,35 @@ class GeoperksForGeodirectoryFeatures {
 	public static function init() {
 		
 		self::register_post_type();
+		
+		$geoperkFeature2 = get_option('geoperksforgd_list_feature_2',true);
+		
+		if($geoperkFeature2!=0) {
+			if(!class_exists('GdShortcodesOnGutenbergClassicEditor')) {
+				include_once GEO_PERKS_FORGD_PATH.'/perks/feature-2/perk-run.php';        
+			}
+		}
 		 
-		add_action('admin_enqueue_scripts', array(__CLASS__, 'enqueue_thickbox'));
-		add_action('admin_print_footer_scripts', array(__CLASS__, 'gd_shortcodes_interface'), 1000);
-		add_filter('mce_external_plugins', array(__CLASS__, 'add_gd_plugin_js'), 100 );
-		add_filter('mce_buttons_2', array(__CLASS__, 'gd_mce_shortcode_btn'));
-		add_filter('geodir_posts_order_by_sort', array(__CLASS__, 'cust_post_order_by_featured_first') ,10,4);
+		$geoperkFeature1 = get_option('geoperksforgd_list_feature_1',true);
 		
+		if($geoperkFeature1!=0) {
+			if(!class_exists('GeopFeaturedFirstInSearch')) {
+				include_once GEO_PERKS_FORGD_PATH.'/perks/feature-1/perk-init.php';        
+			}
+		}
 		
-		add_filter( 'manage_edit-'.GEOPERKSFORGD_POST_TYPE.'_columns', array(__CLASS__, 'edit_columns'));
-		add_action( 'manage_'.GEOPERKSFORGD_POST_TYPE.'_posts_custom_column', array(__CLASS__,'manage_columns'), 10, 2 );
-		add_filter( 'views_edit-'.GEOPERKSFORGD_POST_TYPE, array(__CLASS__, 'add_button_to_views'));
 		add_action('admin_enqueue_scripts', array( __CLASS__, 'load_admin_scripts'));
 		
 		
 		add_action("wp_ajax_sync_ajax_call_gd", array(__CLASS__, 'ajax_insert_post_content'));
 		
+		add_filter('geodir_settings_tabs_array',array(__CLASS__,'geoperk_setting_tab'),1000);
+		add_action('geodir_settings_geoperksforgd_settings', array(__CLASS__,'geoperk_setting_form'), 30);
+		
+		add_action('wp_ajax_geoperksforgeodirectory-enable_disable_action', array(__CLASS__, 'enable_disable_perk_forgd'));
 		
 		
-		if(isset($_REQUEST['post_type']) && $_REQUEST['post_type'] == GEOPERKSFORGD_POST_TYPE)  {
+		if(isset($_REQUEST['tab']) && $_REQUEST['tab'] == 'geoperksforgd_settings')  {
 			$first_time_sync = get_option('perk_first_time_sync', true);
 			if($first_time_sync !=  'yes') {
 				self::insert_post_content();
@@ -56,6 +68,48 @@ class GeoperksForGeodirectoryFeatures {
 	
 	
 	//////////////////////////////////////////////////////////////////////////////////////////
+	
+	public static function perkforgd_default() {         
+		$geoperk_default = array();
+		$geoperk_default[] = array(
+		 'ID' => 'feature_1',
+		 'post_title' => 'Featured first in search',
+		 'post_content' => '',
+		 'perk_url' => 'https://geoperks.club/',
+		 'perk_version' => '1.0');
+		 
+		 $geoperk_default[] = array(
+		 'ID' => 'feature_2',
+		 'post_title' => 'Gd Shortcodes on Gutenberg Classic Editor',
+		 'post_content' => '',
+		 'perk_url' => 'https://geoperks.club/',
+		 'perk_version' => '1.0');
+		 
+		return $geoperk_default;
+    }
+	
+	public static function enable_disable_perk_forgd() {         
+        if(isset($_REQUEST['perk_id'])) {
+            $perk_id = $_REQUEST['perk_id'];
+            $perk_status = (isset($_REQUEST['perk_status'])?$_REQUEST['perk_status']:0);
+                     
+             update_option('geoperksforgd_list_'.$perk_id, $perk_status);
+        }
+    }
+	
+	
+	public static function geoperk_setting_tab($tabs)
+    {	
+        $tabs['geoperksforgd_settings'] = __( 'Geoperks for GeoDirectory', GEOPERKSFORGD_TEXT_DOMAIN);
+        return $tabs; 
+
+    }
+	
+	public static function geoperk_setting_form() {        
+       include_once GEO_PERKS_FORGD_PATH.'/admin/manage_perks.php';        
+    }
+	
+	
 	 public static function register_post_type() {
 		 
 		register_post_type(GEOPERKSFORGD_POST_TYPE,
@@ -68,8 +122,8 @@ class GeoperksForGeodirectoryFeatures {
 							   'capabilities' => array(
 								'create_posts' => false,
 								),
-                               'public' => true,
-                               'has_archive' => true,
+                               'public' => false,
+                               'has_archive' => false,
                                'menu_position' => 56,
                                'rewrite' => array('slug' => GEOPERKSFORGD_POST_TYPE),
                            )
@@ -77,20 +131,7 @@ class GeoperksForGeodirectoryFeatures {
 
 	}
 	
-	public static function edit_columns() {
-
-		$columns = array(
-
-			//'cb' => '&lt;input type="checkbox" />',
-			'srno' => __( 'Sr. No.' ),
-			'perk_title' => __( 'Perk' ),
-			
-			'description' => __( 'Description' ),
-			'docs' => __( 'Docs' )
-		);
-
-		return $columns;
-	}
+	
 	
 	public static function get_geoperksonclient_list() {
 		$perks = get_option('geoperksonclient_list', true);
@@ -108,67 +149,12 @@ class GeoperksForGeodirectoryFeatures {
 	}
 	
 	
-	
-	
-	public static function manage_columns( $column, $post_id ) {
-		global $post;
-		
-		$default_version = '1.0';
-		$perk_id =  get_post_meta($post_id,'meta_perk_id',true);
-		
-		$perk_title = get_the_title($post_id); 
-
-		$perk_version =  get_post_meta($post_id,'meta_perk_version',true);
-		
-		if(empty($perk_version)){
-			$perk_version ="1.0";
-		}
-		
-		$perk_url =  get_post_meta($post_id,'meta_perk_url',true);
-		$perk_is_setting_required =  get_post_meta($post_id,'meta_perk_is_setting_required',true);
-
-		
-
-		switch( $column ) {
-
-			case 'srno' :
-
-				echo self::$cnt;
-				self::$cnt++;
-				break;
-				
-			case 'perk_title' :
-
-				echo '<span class="title-text">'. get_post_field('post_title', $post_id).'</span>';
-				echo  '<br />Folder name: perk-'.$perk_id;
-				break;
-
-			
-			case 'description' :
-
-				echo get_post_field('post_content', $post_id);
-
-				break;
-
-			case 'docs' :
-
-				echo 'Version: '.$perk_version.'<br><a href="'. $perk_url.'" target="_blank">'. __('View More', GEOPERKSFORGD_TEXT_DOMAIN).'</a>';
-
-				break;
-
-
-			default :
-				break;
-		}
-	}
-	
-	
 	public static function load_admin_scripts() {
 
-		wp_enqueue_style('geoperksforgd-admin-settings-css', plugins_url('assets/css/admin-settings.css',GEOPERKSFORGD_FILE_PATH ));
+		wp_enqueue_style('geoperksforgd-admin-settings-css', plugins_url('assets/css/admin-settings.css',GEO_PERKS_FOR_GD_FILE_PATH ));
 
 		
-		wp_register_script( 'geoperksforgd-admin-settings-js', plugins_url('assets/js/admin-settings-gd.js',GEOPERKSFORGD_FILE_PATH), '' , '', true);
+		wp_register_script( 'geoperksforgd-admin-settings-js', plugins_url('assets/js/admin-settings-gd.js',GEO_PERKS_FOR_GD_FILE_PATH), '' , '', true);
 
 		$params_array = array(
 			'ajax_url' => admin_url('admin-ajax.php')
@@ -193,7 +179,7 @@ class GeoperksForGeodirectoryFeatures {
 		global $wpdb;
 		$params = array('for_free_plugin' => '1','site_url'=>get_site_url());
 		
-		$url = GEOPERKSFORGD_PERK_URL.'/user-perk-list';
+		$url = 'https://staging.wpapps.club/wp-json/geoperks/v1/user-perk-list';
 
 			$response = wp_remote_post( $url, array(
 			'method' => 'POST',
@@ -220,13 +206,13 @@ class GeoperksForGeodirectoryFeatures {
 			
 		$querystr = "SELECT * 
 				FROM $wpdb->postmeta 
-				WHERE meta_key LIKE 'meta_perk_id' 
+				WHERE meta_key LIKE 'meta_free_perk_id' 
 				ORDER BY meta_value ASC";
 
-		$meta_perk_id1 = $wpdb->get_results( $querystr, ARRAY_A );
+		$meta_free_perk_id1 = $wpdb->get_results( $querystr, ARRAY_A );
 
 		$newArr= array();
-		foreach($meta_perk_id1 as $valArr)
+		foreach($meta_free_perk_id1 as $valArr)
 		{
 			$meatValuenew='';
 			$postIdnew='';
@@ -255,7 +241,7 @@ class GeoperksForGeodirectoryFeatures {
 					'post_modified' => $perk->post_modified,
 					'guid'			=> $perk->guid,
 					'meta_input'   => array(
-						'meta_perk_id' => $perk->ID,
+						'meta_free_perk_id' => $perk->ID,
 						'meta_perk_version' => $perk->version,
 						'meta_perk_url' => $perk->url,
 						'meta_perk_is_setting_required' => $perk->is_setting_required,
@@ -278,43 +264,5 @@ class GeoperksForGeodirectoryFeatures {
 	}
 	
 	
-	public static function cust_post_order_by_featured_first($orderby, $sort_by, $table, $query)
-	{
-		if(geodir_is_page('search'))
-		{
-			if(!empty($orderby)) {
-				$orderby = $table. '.featured DESC , ' . $orderby ;
-			}
-			else {
-				$orderby = $table. '.featured DESC ' ;    
-			}
-		}		
-		return $orderby;
-	}
-	
-	public static function enqueue_thickbox() {
-		add_thickbox();
-	}
-
-	public static function gd_shortcodes_interface() {
-		ob_start(); 	
-		include_once (dirname(__FILE__).'/includes/insert-shortcode-js.php');
-		$insert_function = ob_get_clean();   
-		ob_start();			
-		WP_Super_Duper::shortcode_insert_button( $editor_id = '', $insert_function);
-		$strcontent = ob_get_clean();
-		echo '<style>.custom-gutenberg-gd-shortcodes-container .super-duper-content-open{ display: none !important;}</style><div class="custom-gutenberg-gd-shortcodes-container">'.$strcontent.'</div>';     
-	}
-
-	public static function add_gd_plugin_js( $plugin_array ) {
-
-		$plugin_array['gd_mce_shortcode_plugin_btn'] = plugin_dir_url(__FILE__).'/js/gd-mce-shortcode-plugin.js';
-		return $plugin_array;
-	}
-
-	public static function gd_mce_shortcode_btn( $buttons ) {	
-		$buttons[] = 'gd_mce_shortcode_plugin_btn';
-		return $buttons;
-	}
 }
 ?>
