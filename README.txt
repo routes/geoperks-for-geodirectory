@@ -14,7 +14,15 @@ GeoPerks is Special Sauce for GeoDirectory.
 
 == Description ==
 
-Choose the subscription that works for you based on how many perks you need on one of more sites. Install GeoPerks and enable the perks to add new options. Choose perks that connect GeoDirectory data to some of the most popular builders including Beaver Themer and Elementor Pro. 
+GeoPerks is Special Sauce for GeoDirectory
+
+This plugin works with GeoDirectory V2+ to add special features not included with GeoDirectory.
+
+Options - 
+
+GeoPerk Featured First for "Search For" results - enable this perk to make featured listings returned in search results 'rise to the top' automatically.
+
+GeoPerk GD Shortcode button for Gutenberg Classic Editor block - sometimes you just want to use a shortcode in a block. Turn on this perk to add a GDV2 shortcode builder button to the Gutenberg Classic editor block. You shouldn't save shortcodes in classic blocks, but it is the best place to add a button. Instead, copy out the shortcode and add it to a Shortcode or HTML block.
 
 == Frequently Asked Questions ==
 
