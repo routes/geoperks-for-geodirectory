@@ -18,8 +18,8 @@ define( 'GEO_PERKS_FORGD_PATH', dirname(__FILE__));
 
 
 add_action('init', array('GeoperksForGeodirectoryFeatures', 'init'),0);
-
-
+add_action('admin_notices', array('GeoperksForGeodirectoryFeatures', 'gd_admin_notice_activation_notice'));
+register_activation_hook(__FILE__,array( 'GeoperksForGeodirectoryFeatures','admin_notice_activation_hook') );
 
 class GeoperksForGeodirectoryFeatures {
 	
@@ -27,6 +27,10 @@ class GeoperksForGeodirectoryFeatures {
 	public static function init() {
 		
 		self::register_post_type();
+		
+		
+		
+		
 		
 		$geoperkFeature2 = get_option('geoperksforgd_list_feature_2',true);
 		
@@ -63,11 +67,41 @@ class GeoperksForGeodirectoryFeatures {
 		}
 		
 		
+		
+		
 	}
 	
 	
 	
 	//////////////////////////////////////////////////////////////////////////////////////////
+	
+	function admin_notice_activation_hook() {
+		
+		
+		$userplugin_path = plugin_dir_path( __DIR__ );
+		$plugin_data = get_plugin_data($userplugin_path . 'geodirectory/geodirectory.php');
+		$plugin_version =explode(".",$plugin_data['Version']);
+	 	$plugin_version =(int)$plugin_version[0];
+		
+		if (!is_plugin_active('geodirectory/geodirectory.php' ) || $plugin_version < 2) {
+			
+			set_transient('gd-admin-notice-activation', true, 5);
+		}
+		
+	}
+	
+	function gd_admin_notice_activation_notice() {
+	
+		if( get_transient( 'gd-admin-notice-activation' ) ){	
+			
+			echo '<div class="error"><p>Geodirectory need to be activated and at least version >=2.0 to activate GeoPerks for GeoDirectory plugin</p></div>';
+				
+			deactivate_plugins($userplugin_path . 'geoperks-for-geodirectory/geoperks-for-geodirectory.php');
+			unset($_GET['activate']);
+			delete_transient( 'gd-admin-notice-activation' );
+		}
+		
+	}
 	
 	public static function perkforgd_default() {         
 		$geoperk_default = array();
