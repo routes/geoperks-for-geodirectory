@@ -109,7 +109,7 @@ class GeoperksForGeodirectoryFeatures {
 		
 	}
 	
-	function gd_admin_notice_activation_notice() {
+	public static function gd_admin_notice_activation_notice() {
 	
 		if( get_transient( 'gd-admin-notice-activation' ) ){	
 			
