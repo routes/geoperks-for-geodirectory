@@ -17,7 +17,7 @@ define( 'GEO_PERKS_FOR_GD_FILE_PATH', __FILE__);
 define( 'GEO_PERKS_FORGD_PATH', dirname(__FILE__));
 
 
-add_action('init', array('GeoperksForGeodirectoryFeatures', 'init'),0);
+add_action('init', array('GeoperksForGeodirectoryFeatures', 'init'),100);
 add_action('admin_notices', array('GeoperksForGeodirectoryFeatures', 'gd_admin_notice_activation_notice'));
 register_activation_hook(__FILE__,array( 'GeoperksForGeodirectoryFeatures','admin_notice_activation_hook') );
 add_action('admin_init', array( 'GeoperksForGeodirectoryFeatures','gdfor_plugin_redirect'));
@@ -27,11 +27,6 @@ class GeoperksForGeodirectoryFeatures {
 	
 	private static $cnt=1;
 	public static function init() {
-		
-		self::register_post_type();
-		
-		
-		
 		
 		
 		$geoperkFeature2 = get_option('geoperksforgd_list_feature_2',true);
@@ -168,26 +163,7 @@ class GeoperksForGeodirectoryFeatures {
     }
 	
 	
-	 public static function register_post_type() {
-		 
-		register_post_type(GEOPERKSFORGD_POST_TYPE,
-                           array(
-                               'labels' => array(
-                                   'name' => __( 'Geoperks For GeoDirectory',  GEOPERKSFORGD_TEXT_DOMAIN),
-                                   'all_items' => __( 'Geoperks For GeoDirectory',  GEOPERKSFORGD_TEXT_DOMAIN),
-                                   'singular_name' => __( 'Geoperk For GeoDirectory',  GEOPERKSFORGD_TEXT_DOMAIN)
-                               ),
-							   'capabilities' => array(
-								'create_posts' => false,
-								),
-                               'public' => false,
-                               'has_archive' => false,
-                               'menu_position' => 56,
-                               'rewrite' => array('slug' => GEOPERKSFORGD_POST_TYPE),
-                           )
-                          );
-
-	}
+	 
 	
 	
 	
