@@ -20,6 +20,8 @@ define( 'GEO_PERKS_FORGD_PATH', dirname(__FILE__));
 add_action('init', array('GeoperksForGeodirectoryFeatures', 'init'),0);
 add_action('admin_notices', array('GeoperksForGeodirectoryFeatures', 'gd_admin_notice_activation_notice'));
 register_activation_hook(__FILE__,array( 'GeoperksForGeodirectoryFeatures','admin_notice_activation_hook') );
+add_action('admin_init', array( 'GeoperksForGeodirectoryFeatures','gdfor_plugin_redirect'));
+add_filter( 'plugin_action_links_' . plugin_basename(__FILE__), array('GeoperksForGeodirectoryFeatures', 'plugin_settings_link' ) );
 
 class GeoperksForGeodirectoryFeatures {
 	
@@ -75,6 +77,24 @@ class GeoperksForGeodirectoryFeatures {
 	
 	//////////////////////////////////////////////////////////////////////////////////////////
 	
+	function plugin_settings_link($links) {
+	$url = get_admin_url() . 'admin.php?page=gd-settings&tab=geoperksforgd_settings';
+	$settings_link = '<a href="'.$url.'">' . __( 'Settings', 'textdomain' ) . '</a>';
+	array_unshift( $links, $settings_link );
+	return $links;
+	}
+	
+	function gdfor_plugin_redirect() {
+		
+		
+    if (get_option('gdfor_plugin_do_activation_redirect', false)) {
+		
+		delete_option('gdfor_plugin_do_activation_redirect');
+		wp_redirect( admin_url( 'admin.php?page=gd-settings&tab=geoperksforgd_settings' ) );
+	    exit;
+    }
+}
+	
 	function admin_notice_activation_hook() {
 		
 		
@@ -86,6 +106,10 @@ class GeoperksForGeodirectoryFeatures {
 		if (!is_plugin_active('geodirectory/geodirectory.php' ) || $plugin_version < 2) {
 			
 			set_transient('gd-admin-notice-activation', true, 5);
+		}
+		else
+		{
+				add_option('gdfor_plugin_do_activation_redirect', true);
 		}
 		
 	}
