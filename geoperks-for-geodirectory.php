@@ -79,7 +79,7 @@ class GeoperksForGeodirectoryFeatures {
 	return $links;
 	}
 	
-	function gdfor_plugin_redirect() {
+	public static function gdfor_plugin_redirect() {
 		
 		
     if (get_option('gdfor_plugin_do_activation_redirect', false)) {
