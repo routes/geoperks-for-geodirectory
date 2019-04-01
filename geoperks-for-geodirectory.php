@@ -213,7 +213,8 @@ class GeoperksForGeodirectoryFeatures {
 		global $wpdb;
 		$params = array('for_free_plugin' => '1','site_url'=>get_site_url());
 		
-		$url = 'https://staging.wpapps.club/wp-json/geoperks/v1/user-perk-list';
+			$url = 'https://geoperks.club/wp-json/geoperks/v1/user-perk-list';
+		
 
 			$response = wp_remote_post( $url, array(
 			'method' => 'POST',
