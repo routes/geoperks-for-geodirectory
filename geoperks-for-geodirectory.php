@@ -72,7 +72,7 @@ class GeoperksForGeodirectoryFeatures {
 	
 	//////////////////////////////////////////////////////////////////////////////////////////
 	
-	function plugin_settings_link($links) {
+	public static function plugin_settings_link($links) {
 	$url = get_admin_url() . 'admin.php?page=gd-settings&tab=geoperksforgd_settings';
 	$settings_link = '<a href="'.$url.'">' . __( 'Settings', 'textdomain' ) . '</a>';
 	array_unshift( $links, $settings_link );
@@ -90,7 +90,7 @@ class GeoperksForGeodirectoryFeatures {
     }
 }
 	
-	function admin_notice_activation_hook() {
+	public static function admin_notice_activation_hook() {
 		
 		
 		$userplugin_path = plugin_dir_path( __DIR__ );
@@ -114,7 +114,7 @@ class GeoperksForGeodirectoryFeatures {
 		if( get_transient( 'gd-admin-notice-activation' ) ){	
 			
 			echo '<div class="error"><p>Geodirectory need to be activated and at least version >=2.0 to activate GeoPerks for GeoDirectory plugin</p></div>';
-				
+			$userplugin_path = plugin_dir_path( __DIR__ );	
 			deactivate_plugins($userplugin_path . 'geoperks-for-geodirectory/geoperks-for-geodirectory.php');
 			unset($_GET['activate']);
 			delete_transient( 'gd-admin-notice-activation' );
