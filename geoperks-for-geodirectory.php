@@ -73,46 +73,36 @@ class GeoperksForGeodirectoryFeatures {
 	//////////////////////////////////////////////////////////////////////////////////////////
 	
 	public static function plugin_settings_link($links) {
-	$url = get_admin_url() . 'admin.php?page=gd-settings&tab=geoperksforgd_settings';
-	$settings_link = '<a href="'.$url.'">' . __( 'Settings', 'textdomain' ) . '</a>';
-	array_unshift( $links, $settings_link );
-	return $links;
+		$url = get_admin_url() . 'admin.php?page=gd-settings&tab=geoperksforgd_settings';
+		$settings_link = '<a href="'.$url.'">' . __( 'Settings', 'textdomain' ) . '</a>';
+		array_unshift( $links, $settings_link );
+		return $links;
 	}
 	
 	public static function gdfor_plugin_redirect() {
-		
-		
-    if (get_option('gdfor_plugin_do_activation_redirect', false)) {
-		
-		delete_option('gdfor_plugin_do_activation_redirect');
-		wp_redirect( admin_url( 'admin.php?page=gd-settings&tab=geoperksforgd_settings' ) );
-	    exit;
-    }
-}
+		if (get_option('gdfor_plugin_do_activation_redirect', false)) {
+			delete_option('gdfor_plugin_do_activation_redirect');
+			wp_redirect( admin_url( 'admin.php?page=gd-settings&tab=geoperksforgd_settings' ) );
+			exit;
+		}
+	}
 	
 	public static function admin_notice_activation_hook() {
-		
-		
 		$userplugin_path = plugin_dir_path( __DIR__ );
 		$plugin_data = get_plugin_data($userplugin_path . 'geodirectory/geodirectory.php');
 		$plugin_version =explode(".",$plugin_data['Version']);
 	 	$plugin_version =(int)$plugin_version[0];
-		
 		if (!is_plugin_active('geodirectory/geodirectory.php' ) || $plugin_version < 2) {
-			
 			set_transient('gd-admin-notice-activation', true, 5);
 		}
 		else
 		{
-				add_option('gdfor_plugin_do_activation_redirect', true);
+			add_option('gdfor_plugin_do_activation_redirect', true);
 		}
-		
 	}
 	
 	public static function gd_admin_notice_activation_notice() {
-	
 		if( get_transient( 'gd-admin-notice-activation' ) ){	
-			
 			echo '<div class="error"><p>Geodirectory need to be activated and at least version >=2.0 to activate GeoPerks for GeoDirectory plugin</p></div>';
 			$userplugin_path = plugin_dir_path( __DIR__ );	
 			deactivate_plugins($userplugin_path . 'geoperks-for-geodirectory/geoperks-for-geodirectory.php');
@@ -145,27 +135,19 @@ class GeoperksForGeodirectoryFeatures {
         if(isset($_REQUEST['perk_id'])) {
             $perk_id = $_REQUEST['perk_id'];
             $perk_status = (isset($_REQUEST['perk_status'])?$_REQUEST['perk_status']:0);
-                     
-             update_option('geoperksforgd_list_'.$perk_id, $perk_status);
+            update_option('geoperksforgd_list_'.$perk_id, $perk_status);
         }
     }
 	
 	
-	public static function geoperk_setting_tab($tabs)
-    {	
+	public static function geoperk_setting_tab($tabs) {	
         $tabs['geoperksforgd_settings'] = __( 'Geoperks for GeoDirectory', GEOPERKSFORGD_TEXT_DOMAIN);
         return $tabs; 
-
-    }
+	}
 	
 	public static function geoperk_setting_form() {        
        include_once GEO_PERKS_FORGD_PATH.'/admin/manage_perks.php';        
     }
-	
-	
-	 
-	
-	
 	
 	public static function get_geoperksonclient_list() {
 		$perks = get_option('geoperksonclient_list', true);
@@ -175,18 +157,14 @@ class GeoperksForGeodirectoryFeatures {
 		return  $perks;
 	}
 	
-	
 	public static function add_button_to_views( $views ) {
 		$views['my-button'] = '<a id="a-update-from-provider-gd" href="javascript:void(0);"  ><button id="update-from-provider-gd" type="button"  title="Sync" class="sync-button" >'.__( "Sync",  GEOPERKSFORGD_TEXT_DOMAIN).'</button><label class="loadspinner" style="display:none;" ><img src="'.admin_url('images/loading.gif').'"  ></label></a>';
 		
 		return $views;
 	}
 	
-	
 	public static function load_admin_scripts() {
-
 		wp_enqueue_style('geoperksforgd-admin-settings-css', plugins_url('assets/css/admin-settings.css',GEO_PERKS_FOR_GD_FILE_PATH ));
-
 		
 		wp_register_script( 'geoperksforgd-admin-settings-js', plugins_url('assets/js/admin-settings-gd.js',GEO_PERKS_FOR_GD_FILE_PATH), '' , '', true);
 
@@ -203,7 +181,6 @@ class GeoperksForGeodirectoryFeatures {
 	public static function ajax_insert_post_content() {
 		$response_data = array('status'=> 1, 'message' => '');
 		self::insert_post_content();
-		
 		echo json_encode($response_data); exit;
 	}
 	
@@ -212,21 +189,17 @@ class GeoperksForGeodirectoryFeatures {
 	public static function insert_post_content() {
 		global $wpdb;
 		$params = array('for_free_plugin' => '1','site_url'=>get_site_url());
+		$pos = strpos($_SERVER['HTTP_HOST'], 'test.geoperks.club');
+		if($pos===false){
+			
+			$url = 'https://geoperks.club/wp-json/geoperks/v1/user-perk-list';
+			
+		}else {
+			
+			$url = 'https://test.geoperks.club/wp-json/geoperks/v1/user-perk-list';
+		}
 		
-		
-		
-			$pos = strpos($_SERVER['HTTP_HOST'], 'test.geoperks.club');
-			if($pos===false){
-				
-				$url = 'https://geoperks.club/wp-json/geoperks/v1/user-perk-list';
-				
-			}else {
-				
-				$url = 'https://test.geoperks.club/wp-json/geoperks/v1/user-perk-list';
-			}
-		
-
-			$response = wp_remote_post( $url, array(
+		$response = wp_remote_post( $url, array(
 			'method' => 'POST',
 			'timeout' => 45,
 			'redirection' => 5,
@@ -237,8 +210,8 @@ class GeoperksForGeodirectoryFeatures {
 			),
 			'body' => $params,
 			'cookies' => array()
-		)
-								  );
+			)
+		);
 		if(is_array($response)) {
 			if(isset($response['body'])) {
 				$perk_response   =  json_decode($response['body']);    
@@ -248,7 +221,6 @@ class GeoperksForGeodirectoryFeatures {
 			} 
 		}
 		
-			
 		$querystr = "SELECT * 
 				FROM $wpdb->postmeta 
 				WHERE meta_key LIKE 'meta_free_perk_id' 
@@ -307,7 +279,5 @@ class GeoperksForGeodirectoryFeatures {
 		}else{return;}
 
 	}
-	
-	
 }
 ?>
