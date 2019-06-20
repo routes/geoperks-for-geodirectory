@@ -26,7 +26,7 @@ GeoPerk GD Shortcode button for Gutenberg Classic Editor block - sometimes you j
 
 == Frequently Asked Questions ==
 
-[GeoDirectory FAQ](http://geoperks.club/faq/).
+[GeoDirectory FAQ](http://geoperks.club/).
 
 == Changelog ==
 
