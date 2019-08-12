@@ -1,11 +1,11 @@
 <?php 
 /*
-Plugin Name: GeoPerks for GeoDirectory
-Plugin URI: https://geoperks.club
-Description: GeoPerks is special sauce for GeoDirectory
+Plugin Name: WP Perks for GeoDirectory
+Plugin URI: https://wpperks.io
+Description: Effortlessly install enhancements for GeoDirectory
 Version: 1.0
-Author: @alexrollin, @rightmentor, @ismiaini, @wpappsclub
-Author URI: http://wpapps.club
+Author: @alexrollin, @rightmentor, @ismiaini, @wpperks
+Author URI: http://wpperks.io
 Text Domain: geoperks-for-geodirectory
 Domain Path: /languages
 License: GPL3
